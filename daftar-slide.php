@@ -21,7 +21,7 @@ $slide = select("SELECT * FROM slide");
 ?>
 
 <div class="container mt-5">
-    <h1>ReviewkanLe</h1>
+    <h1>Atur Slide</h1>
     <a href="tambah-slide.php" class="btn btn-success "> Tambah</a>
 
     <table class="table table-striped table-bordered mt-3 "  id="table">

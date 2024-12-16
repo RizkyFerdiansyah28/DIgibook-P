@@ -50,10 +50,10 @@ if (isset($_POST['ubah'])) {
 ?>
 
 <div class="container">
-    <h1 class="mt-5">Edit Buku</h1>
+    <h1 class="mt-5">Edit Slide</h1>
     <hr>
 
-    <h2 class="mt-5">Detail Buku</h2>
+    <h2 class="mt-5">Detail Slide</h2>
     <form action="" method="post" class="mt-5" enctype="multipart/form-data">
     <input type="hidden" name="id_slide" value="<?= $slide['id_slide']; ?>">
     <input type="hidden" name="gambar_slide_lama" value="<?= $slide['gambar_slide']; ?>">
