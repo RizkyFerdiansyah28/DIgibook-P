@@ -106,7 +106,7 @@ $keranjang = select("
                     <p class="transaction-price">Rp <?= number_format($buku['harga_total'], 0, ',', '.'); ?></p>
                 </div>
                 <a href="hapus-keranjang.php?id_keranjang=<?= $buku['id_keranjang']; ?>" class="btn btn-danger"
-                     onclick="return confirm('Apakah anda yakin untuk menghapus review')">Hapus
+                     onclick="return confirm('Apakah anda yakin untuk menghapus buku?')">Hapus
                 </a>
             </div>
                 <?php endforeach; ?>

@@ -19,7 +19,10 @@
 
     $buku = select("SELECT * FROM buku WHERE id_buku = $id_buku")[0];
 
-    
+    // Cek apakah buku sudah dibeli oleh user
+    $id_user = $_SESSION['id_user']; // ID user yang sedang login
+    $cek_pembelian = select("SELECT * FROM transaksi WHERE id_buku = $id_buku AND id_user = $id_user");
+
 ?>
 
 <style>
@@ -110,17 +113,24 @@
         <p><?= $buku['sinopsis_buku']; ?>
         
        </p>
+       <!-- cek user admin atau bukan -->
        <?php if ($_SESSION['status'] == 1): ?>
         <!-- //tambah ke keranjan -->
         <div >
           <a href="edit-buku.php?id_buku=<?= $buku['id_buku']; ?>" class="btn btn-primary">Edit</a>
           <?php endif; ?>
+           <!-- Cek apakah buku sudah dibeli -->
+        <?php if (count($cek_pembelian) > 0): ?>
+          <p class="text-danger">Anda sudah membeli buku ini.</p>
+        <?php else: ?>
+          <!-- Form Tambahkan ke Keranjang -->
           <form action="keranjang.php" method="POST">
             <input type="hidden" name="id_buku" value="<?= $buku['id_buku']; ?>">
-            <input type="hidden" name="id_user" value="<?= $_SESSION['id_user']; ?>"> <!-- ID user yang login -->
+            <input type="hidden" name="id_user" value="<?= $_SESSION['id_user']; ?>">
             <input type="hidden" name="harga_buku" value="<?= $buku['harga_buku']; ?>">
             <button type="submit" class="btn btn-success">Tambahkan ke Keranjang</button>  
-          </form> 
+          </form>
+        <?php endif; ?>
           </div>
 
       </div>
