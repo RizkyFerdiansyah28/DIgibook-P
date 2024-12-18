@@ -47,6 +47,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 alert('Pilih metode pembayaran terlebih dahulu');
               </script>";
     } else {
+       $bukti_pembayaran = uploadBuktiTransaksi();
         // Mulai transaksi database
         mysqli_begin_transaction($db);
 
@@ -57,14 +58,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $harga_total = $item['harga_total'];
 
                 // Simpan transaksi ke tabel
-                $stmt = $db->prepare("INSERT INTO transaksi (id_user, id_buku, total_bayar, metode_bayar, tanggal_transaksi) 
-                                      VALUES (?, ?, ?, ?, NOW())");
-                $stmt->bind_param("iids", $id_user, $id_buku, $harga_total, $metode_bayar);
+                $stmt = $db->prepare("INSERT INTO transaksi (id_user, id_buku, total_bayar, metode_bayar, bukti_pembayaran, tanggal_transaksi) 
+                      VALUES (?, ?, ?, ?, ?, NOW())");
+
+                // Perbaiki tipe data bind_param, tambahkan 's' untuk $bukti_pembayaran
+                $stmt->bind_param("iisss", $id_user, $id_buku, $harga_total, $metode_bayar, $bukti_pembayaran);
 
                 if (!$stmt->execute()) {
-                    throw new Exception("Gagal menyimpan transaksi.");
+                    throw new Exception("Gagal menyimpan transaksi: " . $stmt->error);
                 }
                 $stmt->close();
+
             }
 
             // Kosongkan keranjang
@@ -79,64 +83,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             mysqli_commit($db);
 
             echo "<script>
-                  // Membuat modal untuk menampilkan gambar dan teks
-                  var modal = document.createElement('div');
-                  modal.style.position = 'fixed';
-                  modal.style.top = '0';
-                  modal.style.left = '0';
-                  modal.style.width = '100%';
-                  modal.style.height = '100%';
-                  modal.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-                  modal.style.display = 'flex';
-                  modal.style.justifyContent = 'center';
-                  modal.style.alignItems = 'center';
-                  modal.style.zIndex = '1000';
-                  modal.style.opacity = '0'; // Awalnya modal transparan
-      
-                  // Membuat elemen form
-                  var form = document.createElement('div');
-                  form.style.backgroundColor = 'white';
-                  form.style.padding = '20px';
-                  form.style.borderRadius = '8px';
-                  form.style.boxShadow = '0 0 15px rgba(0, 0, 0, 0.2)';
-                  form.style.textAlign = 'center';
-      
-                  // Membuat elemen teks
-                  var text = document.createElement('div');
-                  text.innerHTML = 'Silahkan bayar'; // Menambahkan teks
-                  text.style.color = 'black'; // Warna teks
-                  text.style.fontSize = '24px'; // Ukuran font
-                  text.style.marginBottom = '20px'; // Jarak teks ke gambar
-                  text.style.fontWeight = 'bold'; // Teks tebal
-      
-                  // Membuat gambar
-                  var img = document.createElement('img');
-                  img.src = './foto/qris/qris.jpg'; // Ganti dengan URL atau path gambar yang sesuai
-                  img.alt = 'QR Code';
-                  img.style.maxWidth = '2000px'; // Menyesuaikan ukuran gambar
-                  img.style.marginBottom = '20px'; // Jarak gambar ke teks
-                  img.style.transition = 'transform 0.5s ease, opacity 1s ease'; // Efek transisi untuk gambar
-      
-                  // Menambahkan teks dan gambar ke form
-                  form.appendChild(text);
-                  form.appendChild(img);
-      
-                  // Menambahkan form ke modal
-                  modal.appendChild(form);
-                  document.body.appendChild(modal);
-      
-                  // Menambahkan animasi muncul dengan fade-in dan zoom-in
-                  setTimeout(function() {
-                      modal.style.opacity = '1'; // Mengubah opacity menjadi 1 (fade-in)
-                      img.style.transform = 'scale(1.1)'; // Efek zoom-in pada gambar
-                  }, 10); // Menunggu sedikit agar transisi mulai bekerja
-      
-                  // Menutup modal setelah 5 detik
-                  setTimeout(function() {
-                      modal.remove();
                       alert('Transaksi berhasil!');
-                      document.location.href = 'profil.php'; // Arahkan ke profil.php setelah konfirmasi
-                  }, 5000); // 5000 ms = 5 detik
+                      document.location.href = 'profil.php';
                 </script>";
         } catch (Exception $e) {
             mysqli_rollback($db); // Rollback transaksi jika terjadi kesalahan
@@ -173,11 +121,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <span>Total (Rp)</span>
             <strong>Rp <?= number_format($total_bayar, 2, ',', '.'); ?></strong>
           </li>
+            <span class="text-body-secondary">SIlahkan Bayar melalui nomer rekening berikut atau lewat Qris</span>
+            <span class="text-body-secondary"><strong>7389473289749828</strong></span>
+            <img src="./foto/qris/qris.jpg" alt="" srcset="" class="mt-3">
         </ul>
       </div>
       <div class="col-md-7 col-lg-8">
-        <h4 class="mb-3">Alamat Penagihan</h4>
-        <form method="POST" action="" class="needs-validation" novalidate>
+        <form method="POST" action="" enctype="multipart/form-data" class="needs-validation" novalidate>
           <div class="mb-3">
             <label for="metode_bayar" class="form-label">Metode Pembayaran</label>
             <select class="form-control" id="metode_bayar" name="metode_bayar" required>
@@ -190,12 +140,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 ?>
             </select>
           </div>
+
+          <div class="mb-3">
+            <label for="bukti_pembayaran" class="form-label">Berikan Bukti Bayar</label>
+            <input type="file" class="form-control" id="bukti_pembayaran" name="bukti_pembayaran" placeholder="Tambahkan Foto..." onchange="previewImg()"
+                required>
+
+            <img src="" class="img-thumbnail img-preview" alt="" width="500px">
+          </div>
           <button class="w-100 btn btn-primary btn-lg" type="submit">Lanjutkan Pembayaran</button>
         </form>
       </div>
     </div>
   </main>
 </div>
+
+<script>
+    function previewImg() {
+        const bukti_pembayaran = document.querySelector('#bukti_pembayaran');
+        const imgPreview = document.querySelector('.img-preview');
+
+        const fileBuktiTransfer = new FileReader();
+        fileBuktiTransfer.readAsDataURL(bukti_pembayaran.files[0]);
+
+        fileBuktiTransfer.onload = function(e){
+            imgPreview.src = e.target.result;
+        }
+    }
+    </script>
 
 <?php 
 include 'layout/footer.php';

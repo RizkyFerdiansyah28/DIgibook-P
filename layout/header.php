@@ -116,11 +116,11 @@
                             <?php if ($_SESSION['status'] == 1): ?>
                             <li><a class="dropdown-item" href="admin-dashboard.php">Dashboard Admint</a></li>
                             <li><a class="dropdown-item" href="daftar-slide.php">Atur Slide</a></li>
+                            <li><a class="dropdown-item" href="admin-status-transaksi.php">Status Pembayaran</a></li>
                             <?php endif; ?> 
                             <?php if ($_SESSION['status'] != 1): ?>
                             <li><a class="dropdown-item" href="keranjang.php?id_user=<?= $user['id_user'];?>">Keranjang</a></li>
-                            <?php endif; ?> 
-                            <?php if ($_SESSION['status'] != 1): ?>
+                            <li><a class="dropdown-item" href="user-status-transaksi.php"?id_user=<?= $user['id_user'];?>>Status Pembayaran</a></li>
                             <li><a class="dropdown-item" href="histori-transaksi.php?id_user=<?= $user['id_user'];?>">Histori Transaksi</a></li>
                             <?php endif; ?> 
                             <li><hr class="dropdown-divider"></li>

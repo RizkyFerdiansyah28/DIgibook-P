@@ -16,13 +16,15 @@ $id_user = $_SESSION['id_user'];
 // Ambil data pengguna yang login
 $user = select("SELECT * FROM users WHERE id_user = $id_user")[0];
 
+// Ambil data buku yang dibeli dan berstatus accepted
 $buku_dibeli = select("
-    SELECT b.judul_buku, b.sampul_buku, b.harga_buku, b.rating_buku ,b.sinopsis_buku, b.isi_buku, t.total_bayar, t.tanggal_transaksi 
+    SELECT b.judul_buku, b.sampul_buku, b.harga_buku, b.rating_buku, b.sinopsis_buku, b.isi_buku, t.total_bayar, t.tanggal_transaksi, t.status_pembayaran
     FROM transaksi t
     JOIN buku b ON t.id_buku = b.id_buku
-    WHERE t.id_user = $id_user
+    WHERE t.id_user = $id_user AND t.status_pembayaran = 'accepted'
     ORDER BY t.tanggal_transaksi DESC
 ");
+
 
 $total_transaksi_user = select("SELECT  SUM(total_bayar) AS total FROM transaksi WHERE id_user = $id_user")[0]['total'];
 ?>

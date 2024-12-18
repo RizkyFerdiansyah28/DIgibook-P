@@ -243,30 +243,41 @@
 
     $id_user = $post['id_user']; // ID user yang melakukan transaksi
     $id_buku = $post['id_buku']; // ID buku yang dibeli
-    $jumlah  = $post['jumlah'];  // Jumlah buku yang dibeli
     $total_bayar = $post['total_bayar']; // Total harga transaksi
     $metode_bayar = $post['metode_bayar'];
     $tanggal_transaksi = date('Y-m-d H:i:s'); // Waktu transaksi
+    $bukti_pembayaran = uploadBuktiTransaksi();
+
+    //status transaki
+
+    $status_pembayaran = 'Pending';
+
+    if (!$bukti_pembayaran) {
+        echo "<script>alert('Gagal mengunggah isi Bukti!');</script>";
+        return 0; // Return error jika upload gagal
+    }
 
     // Query untuk memasukkan data transaksi ke tabel 'transaksi'
-    $query = "INSERT INTO transaksi (id_user, id_buku, total_bayar,metode_bayar, tanggal_transaksi) 
-              VALUES ('$id_user', '$id_buku', '$total_bayar','$metode_bayar', '$tanggal_transaksi')";
+    $query = "INSERT INTO transaksi (id_user, id_buku, total_bayar, metode_bayar, tanggal_transaksi, bukti_pembayaran, status_pembayaran) 
+    VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+    $stmt = $db->prepare($query);
+    $stmt->bind_param("iiissss", $id_user, $id_buku, $total_bayar, $metode_bayar, $tanggal_transaksi, $bukti_pembayaran, $status_pembayaran);
 
     mysqli_query($db, $query);
     return mysqli_affected_rows($db);
     }
 
 // Fungsi untuk mengambil data transaksi berdasarkan user
-    function get_transaksi_by_user($id_user)
-    {
+function get_transaksi_by_user($id_user)
+{
     global $db;
 
-    // Query untuk mengambil data transaksi
-    $query = "SELECT transaksi.*, buku.judul_buku, buku.harga_buku 
-              FROM transaksi 
-              JOIN buku ON transaksi.id_buku = buku.id_buku 
-              WHERE transaksi.id_user = '$id_user' 
-              ORDER BY transaksi.tanggal_transaksi DESC";
+    $query = "SELECT transaksi.*, buku.judul_buku 
+    FROM transaksi 
+    JOIN buku ON transaksi.id_buku = buku.id_buku 
+    WHERE transaksi.id_user = $id_user 
+    ORDER BY transaksi.tanggal_transaksi DESC";
 
     $result = mysqli_query($db, $query);
     $rows = [];
@@ -275,6 +286,60 @@
     }
 
     return $rows;
+}
+
+
+    function uploadBuktiTransaksi()
+    {
+        $nama_BuktiTransaksi = $_FILES['bukti_pembayaran']['name'];
+        $ukuran_BuktiTransaksi = $_FILES['bukti_pembayaran']['size'];
+        $error = $_FILES['bukti_pembayaran']['error'];  
+        $tmpName = $_FILES['bukti_pembayaran']['tmp_name'];
+
+        //cek file yang diupload
+        $extensifileValid = ['jpg', 'jpeg', 'png'];
+        $extensifile= explode('.', $nama_BuktiTransaksi);
+        $extensifile= strtolower(end($extensifile));
+
+        if (!in_array($extensifile, $extensifileValid)){
+            //pesan gagal
+
+            echo "<script>
+                    alert('Format File Salah');
+                    document.location.href = 'transaksi.php';
+            </script>";
+            die();
+        }
+
+        //mengubah nama file menjadi nama baru
+        $namaBukti   = uniqid();
+        $namaBukti  .= '.';
+        $namaBukti  .= $extensifile;
+
+        //pindah ke folder foto
+        move_uploaded_file($tmpName, 'foto/bukti-transaksi/'. $namaBukti);
+        return ($namaBukti);
+
+    }
+
+    function acc_pembayaran($id_transaksi)
+    {
+        global $db;
+
+        $query = "UPDATE transaksi SET status_pembayaran = 'Accepted' WHERE id_transaksi = '$id_transaksi'";
+        mysqli_query($db, $query);
+
+        return mysqli_affected_rows($db);
+    }
+
+    function reject_pembayaran($id_transaksi)
+    {
+    global $db;
+
+        $query = "UPDATE transaksi SET status_pembayaran = 'Rejected' WHERE id_transaksi = '$id_transaksi'";
+        mysqli_query($db, $query);
+
+        return mysqli_affected_rows($db);
     }
 
     function tambah_keranjang($post) {
