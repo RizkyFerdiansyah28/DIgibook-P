@@ -27,11 +27,9 @@ $user = select("SELECT * FROM users WHERE id_user = $id_user")[0];
 // Total buku yang dibeli oleh semua pengguna
 $total_buku_dibeli = select("SELECT COUNT(*) AS total FROM transaksi")[0]['total'];
 
-// Total transaksi oleh pengguna saat ini
-$total_transaksi_user = select("SELECT COUNT(*) AS total FROM transaksi WHERE id_user = $id_user")[0]['total'];
 
 // Total semua transaksi (jumlah total_bayar oleh semua pengguna)
-$total_pembayaran_semua_user = select("SELECT SUM(total_bayar) AS total FROM transaksi")[0]['total'];
+$total_pembayaran_semua_user = select("SELECT SUM(total_bayar) AS total FROM transaksi WHERE status_pembayaran NOT IN ('pending', 'rejected')")[0]['total'];
 
 //Ambil data buku terlaris
 $buku_terlaris = select("SELECT b.judul_buku, COUNT(t.id_buku) AS jumlah_terjual FROM transaksi t JOIN buku b ON t.id_buku = b.id_buku GROUP BY t.id_buku ORDER BY jumlah_terjual DESC LIMIT 5");

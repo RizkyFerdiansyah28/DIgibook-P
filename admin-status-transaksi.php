@@ -69,7 +69,7 @@ $pending_transaksi = get_pending_transaksi();
                 <td class="text-center"><?= $transaksi['total_bayar']; ?></td>
                 <td class="text-center"><?= $transaksi['metode_bayar']; ?></td>
                 <td class="text-center"><?=date('d F Y', strtotime( $transaksi['tanggal_transaksi'])); ?></td>>
-                <td class="text-center"><img src="./foto/bukti-transaksi/<?= $transaksi['bukti_pembayaran']; ?>" ></td>
+                <td class="text-center"><img src="./foto/bukti-transaksi/<?= $transaksi['bukti_pembayaran']; ?>"  width="150px"></td>
                 <td width="15%" class="text-center">
                 <form method="POST" action="acc_reject_transaksi.php">
                     <input type="hidden" name="id_transaksi" value="<?= $transaksi['id_transaksi'] ?>">

@@ -26,7 +26,7 @@ $buku_dibeli = select("
 ");
 
 
-$total_transaksi_user = select("SELECT  SUM(total_bayar) AS total FROM transaksi WHERE id_user = $id_user")[0]['total'];
+$total_transaksi_user = select("SELECT  SUM(total_bayar) AS total FROM transaksi WHERE status_pembayaran NOT in ('pending', 'rejected') && id_user = $id_user")[0]['total'];
 ?>
 
 
