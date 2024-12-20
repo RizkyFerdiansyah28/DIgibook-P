@@ -21,7 +21,8 @@ $buku = select("SELECT * FROM buku WHERE id_buku = $id_buku")[0];
 
 // Cek apakah buku sudah dibeli oleh user
 $id_user = $_SESSION['id_user']; // ID user yang sedang login
-$cek_pembelian = select("SELECT * FROM transaksi WHERE id_buku = $id_buku AND id_user = $id_user AND (status_pembayaran = 'Pending' OR status_pembayaran = 'Accepted' OR status_pembayaran = 'Rejected')");
+// Ambil transaksi terbaru dengan status yang relevan
+$cek_pembelian = select("SELECT * FROM transaksi WHERE id_buku = $id_buku AND id_user = $id_user ORDER BY tanggal_transaksi DESC LIMIT 1");
 $cek_keranjang = select("SELECT * FROM keranjang WHERE id_buku = $id_buku AND id_user = $id_user");
 
 ?>
@@ -122,7 +123,7 @@ $cek_keranjang = select("SELECT * FROM keranjang WHERE id_buku = $id_buku AND id
                     <?php if ($status_pembayaran === 'Pending'): ?>
                         <p class="text-warning">Pembayaran Anda sedang diproses.</p>
                     <?php elseif ($status_pembayaran === 'Accepted'): ?>
-                        <p class="text-danger">Buku ini sudah dibeli.</p>
+                        <p class="text-success">Buku ini sudah dibeli.</p>
                     <?php elseif ($status_pembayaran === 'Rejected'): ?>
                         <p class="text-danger">Pembayaran Anda ditolak. Anda dapat membeli buku ini lagi.</p>
                         <form action="keranjang.php" method="POST">
